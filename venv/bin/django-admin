@@ -1,4 +1,4 @@
-#!/home/caio/back-safekey/venv/bin/python3
+#!/home/caio/Back-SafeKey/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

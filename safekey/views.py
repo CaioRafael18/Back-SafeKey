@@ -1,17 +1,19 @@
 from rest_framework import viewsets
 from safekey.models import Usuario, TipoUsuario
-from safekey.serializers import UsuarioSerializer, TiposUsuariosSerializer
-
+from safekey.serializers import UsuarioSerializer, TiposUsuariosSerializer, CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+    
 # Criando ViewSet com todo o crud do meu modelo Usuario
 class UsuarioViewSet(viewsets.ModelViewSet):
+    # permission_classes = [IsAluno, ]
     queryset = Usuario.objects.all() # buscando todos os dados do meu usuário
     serializer_class = UsuarioSerializer
 
-    def perform_create(self, serializer):
-        usuario = serializer.save() # salva o Usuario e retorna o objeto salvo
-        TipoUsuario.objects.create(usuario=usuario)  # Associando corretamente o usuário ao TipoUsuario
-
-# Criando ViewSet para a request do tipo Get
-class TiposUsuariosView(viewsets.ReadOnlyModelViewSet):
+# Criando ViewSet com todo o crud do meu modelo TipoUsuario
+class TiposUsuariosView(viewsets.ModelViewSet):
     queryset = TipoUsuario.objects.all()
     serializer_class = TiposUsuariosSerializer
+
+# Criando ViewSet para o login
+class loginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

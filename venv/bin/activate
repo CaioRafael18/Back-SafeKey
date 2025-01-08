@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV=/home/caio/back-safekey/venv
+VIRTUAL_ENV=/home/caio/Back-SafeKey/venv
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

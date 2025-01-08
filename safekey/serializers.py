@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from safekey.models import Usuario, TipoUsuario
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class UsuarioSerializer(serializers.ModelSerializer):
     # Definindo o modelo usuário e pegando todos os campos
@@ -8,10 +10,33 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TiposUsuariosSerializer(serializers.ModelSerializer):
-    idUsuario = serializers.IntegerField(source='usuario.id')  # Extrai apenas o ID do usuário
-    nome = serializers.CharField(source='usuario.nome')  # Extrai apenas o nome do usuário
-    tipo = serializers.CharField(source='usuario.tipo')  # Extrai apenas o tipo do usuário
-
     class Meta:
         model = TipoUsuario
-        fields = ['id', 'idUsuario', 'nome', 'tipo']
+        fields = '__all__'
+
+class CustomTokenObtainPairSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    senha = serializers.CharField()
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        senha = attrs.get('senha')
+
+        # Verificando autenticação do usuário
+        usuario = authenticate(request=self.context.get('request'), email=email, senha=senha)
+
+        # Se o usuário não existe
+        if usuario is None:
+            raise serializers.ValidationError("Credenciais inválidas.")
+        
+        # Criando token e refresh token
+        refresh_token = RefreshToken.for_user(usuario)
+        access_token = refresh_token.access_token
+
+        # Se o usuário for autenticado com sucesso, retorne os dados necessários
+        usuario_serializer = UsuarioSerializer(usuario)
+        return {
+            'refresh_token': str(refresh_token),
+            'access_token': str(access_token),
+            'usuario': usuario_serializer.data
+        }

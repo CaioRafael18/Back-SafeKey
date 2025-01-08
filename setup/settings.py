@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-%uaj8ai29#!8wo^2eeg*hr9m8hmwxnt1uje_fpe*0zk-buryh%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['54.207.74.206']  
+ALLOWED_HOSTS = ['127.0.0.1','54.207.74.206']  
 
 # Application definition
 
@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'safekey',
-    'drf_yasg'
+    'drf_yasg',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -100,6 +101,16 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'safekey.authentication.AutenticandoUsuario',
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 
 # Internationalization
