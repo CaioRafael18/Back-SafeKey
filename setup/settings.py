@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -103,13 +104,23 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
     'safekey.authentication.AutenticandoUsuario',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=1000),  # Tempo de vida do access token
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Tempo de vida do refresh token
+    'ROTATE_REFRESH_TOKENS': False,  # Para evitar rotação automática
+    'BLACKLIST_AFTER_ROTATION': True,  # Blacklist após rotação
+    'ALGORITHM': 'HS256',  # Algoritmo de criptografia
+    'SIGNING_KEY': SECRET_KEY,  # Chave usada para assinar os tokens
 }
 
 

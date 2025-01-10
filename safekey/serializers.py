@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class UsuarioSerializer(serializers.ModelSerializer):
-    # Definindo o modelo usuário e pegando todos os campos
+    # Definindo o modelo e pegando todos os campos
     class Meta:
         model = Usuario
         fields = '__all__'
@@ -32,6 +32,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         # Criando token e refresh token
         refresh_token = RefreshToken.for_user(usuario)
         access_token = refresh_token.access_token
+        access_token['tipoUsuario'] = usuario.tipo.tipo
 
         # Se o usuário for autenticado com sucesso, retorne os dados necessários
         usuario_serializer = UsuarioSerializer(usuario)
