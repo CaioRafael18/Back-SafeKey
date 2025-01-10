@@ -9,6 +9,7 @@ packaging==24.2
 PyJWT==2.10.1
 pytz==2024.2
 PyYAML==6.0.2
+rest-framework-simplejwt==0.0.2
 sqlparse==0.5.3
 typing_extensions==4.12.2
 uritemplate==4.1.1
