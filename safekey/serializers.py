@@ -1,43 +1,53 @@
 from rest_framework import serializers
-from safekey.models import Usuario, TipoUsuario
+from safekey.models import User, UserType, Room, Reservation
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-class UsuarioSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     # Definindo o modelo e pegando todos os campos
     class Meta:
-        model = Usuario
+        model = User
         fields = '__all__'
 
-class TiposUsuariosSerializer(serializers.ModelSerializer):
+class UsersTypesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TipoUsuario
+        model = UserType
         fields = '__all__'
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    senha = serializers.CharField()
+    password = serializers.CharField()
 
     def validate(self, attrs):
         email = attrs.get('email')
-        senha = attrs.get('senha')
+        password = attrs.get('password')
 
         # Verificando autenticação do usuário
-        usuario = authenticate(request=self.context.get('request'), email=email, senha=senha)
+        user = authenticate(request=self.context.get('request'), email=email, password=password)
 
         # Se o usuário não existe
-        if usuario is None:
+        if user is None:
             raise serializers.ValidationError("Credenciais inválidas.")
         
         # Criando token e refresh token
-        refresh_token = RefreshToken.for_user(usuario)
+        refresh_token = RefreshToken.for_user(user)
         access_token = refresh_token.access_token
-        access_token['tipoUsuario'] = usuario.tipo.tipo
+        access_token['userType'] = user.type.type
 
         # Se o usuário for autenticado com sucesso, retorne os dados necessários
-        usuario_serializer = UsuarioSerializer(usuario)
+        user_serializer = UserSerializer(user)
         return {
             'refresh_token': str(refresh_token),
             'access_token': str(access_token),
-            'usuario': usuario_serializer.data
+            'user': user_serializer.data
         }
+
+class RoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = '__all__'
+
+class ReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
+        fields = '__all__'

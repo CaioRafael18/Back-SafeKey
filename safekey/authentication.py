@@ -1,12 +1,12 @@
 from django.contrib.auth.backends import BaseBackend
-from safekey.models import Usuario
+from safekey.models import User
 
-class AutenticandoUsuario(BaseBackend):
-    def authenticate(self, request, email=None, senha=None):
+class AuthenticationUser(BaseBackend):
+    def authenticate(self, request, email=None, password=None):
         try:
-            usuario = Usuario.objects.get(email=email)
-            if usuario.senha == senha:
-                return usuario
-        except Usuario.DoesNotExist:
+            user = User.objects.get(email=email)
+            if user.password == password:
+                return user
+        except user.DoesNotExist:
             return None
 
