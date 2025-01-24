@@ -3,7 +3,7 @@ from safekey.models import User, UserType, Room, Reservation
 from safekey.serializers import UserSerializer, UsersTypesSerializer, CustomTokenObtainPairSerializer, RoomSerializer, ReservationSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from safekey.permissions.permissions_user import PermissionUser
-from safekey.permissions.permissions_users_types import PermissionsTypesUsers
+from safekey.permissions.permissions_users_types import PermissionsUsersTypes
 from rest_framework.permissions import IsAuthenticated
     
 # Criando ViewSet com todo o crud do meu modelo Usuario

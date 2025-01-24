@@ -36,10 +36,18 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 
         # Se o usuário for autenticado com sucesso, retorne os dados necessários
         user_serializer = UserSerializer(user)
+        id_type = user_serializer.data['type']
+        type_object = UserType.objects.get(id=id_type)
+        user_type_serializer = UsersTypesSerializer(type_object)
+
+        # Substituir o campo 'type' no user_serializer.data com os dados completos do 'user_type_serializer.data'
+        user_data = user_serializer.data
+        user_data['type'] = user_type_serializer.data
+
         return {
             'refresh_token': str(refresh_token),
             'access_token': str(access_token),
-            'user': user_serializer.data
+            'user': user_data,
         }
 
 class RoomSerializer(serializers.ModelSerializer):

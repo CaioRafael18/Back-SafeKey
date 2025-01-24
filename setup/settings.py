@@ -106,7 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'safekey.authentication.AutenticandoUsuario',
+    'safekey.authentication.AuthenticationUser',
 ]
 
 REST_FRAMEWORK = {
