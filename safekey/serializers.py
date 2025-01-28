@@ -3,16 +3,17 @@ from safekey.models import User, UserType, Room, Reservation
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-class UserSerializer(serializers.ModelSerializer):
-    # Definindo o modelo e pegando todos os campos
-    class Meta:
-        model = User
-        fields = '__all__'
-
 class UsersTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserType
         fields = '__all__'
+        
+class UserSerializer(serializers.ModelSerializer):
+    type = UsersTypesSerializer()
+
+    class Meta:
+        model = User
+        fields = ['id','name','email','password','type']
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -22,12 +23,13 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         email = attrs.get('email')
         password = attrs.get('password')
 
-        # Verificando autenticação do usuário
-        user = authenticate(request=self.context.get('request'), email=email, password=password)
-
-        # Se o usuário não existe
-        if user is None:
-            raise serializers.ValidationError("Credenciais inválidas.")
+        try:
+            # Verificando autenticação do usuário
+            user = authenticate(request=self.context.get('request'), email=email, password=password)
+        except:
+            return {
+                'error': 'usuário não encontrado.'
+            }
         
         # Criando token e refresh token
         refresh_token = RefreshToken.for_user(user)
