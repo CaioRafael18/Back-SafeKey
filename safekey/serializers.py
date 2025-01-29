@@ -11,7 +11,7 @@ class UsersTypesSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class UserSerializer(serializers.ModelSerializer):
-    type = serializers.PrimaryKeyRelatedField(queryset=UserType.objects.all())  # Para POST, aceita apenas o ID do tipo
+    type = serializers.PrimaryKeyRelatedField(queryset=UserType.objects.all())  # Para POST, aceita apenas o ID do type
 
     class Meta:
         model = User
@@ -24,10 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def to_representation(self, instance):
-        """
-        Para o GET, retorna o objeto completo do tipo de usuário
-        (com id e type).
-        """
+        # retorna o objeto completo do tipo de usuário (com id e type)
         representation = super().to_representation(instance)
         representation['type'] = UsersTypesSerializer(instance.type).data
         return representation
@@ -76,3 +73,9 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = '__all__'
+
+    def validate(self, data):
+        # Valida conflitos antes de salvar no banco
+        temp_reservation = Reservation(**data)  # Cria um objeto temporário com os dados recebidos
+        temp_reservation.check_reservation()  # Chama a validação do modelo
+        return data
