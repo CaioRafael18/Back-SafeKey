@@ -30,7 +30,7 @@ class Room(models.Model):
 class Reservation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE) # Chave estrangeira para o usuário
     room = models.ForeignKey(Room, on_delete=models.CASCADE) # Chave estrangeira para a sala
-    date = models.DateField(blank = False, null = False) # Campo para armazenar a data da reserva
+    date_schedulling = models.DateField(blank = False, null = False) # Campo para armazenar a data da reserva
     start_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de inicio
     end_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de fim
     reason = models.TextField(blank = False, null = False, max_length = 200) # campo para armazenar razao da reserva (TextField utilizado para textos grandes)
@@ -39,14 +39,27 @@ class Reservation(models.Model):
 
     # Exclui o registro
     def delete(self):
+        self.insert_history()
         self.deleted_at = now()
         self.save()
+
+    def insert_history(self):
+        # Cria na tabela historico o registro da reserva que será deletado ao ser entregue a chave
+        History.objects.create(
+            user=self.user,
+            room=self.room,
+            real_date_schedulling=self.date_schedulling,
+            real_start_time=self.start_time,
+            real_end_time=self.end_time,
+            reason=self.reason,
+            commentary=self.commentary
+        )
         
     def check_reservation(self):
         # Verifica se há conflito de reservas para a mesma sala e horário
         conflict = Reservation.objects.filter(
             room=self.room,
-            date=self.date,
+            date_schedulling=self.date_schedulling,
             deleted_at__isnull=True,
             start_time__lt=self.end_time, # lt: menor que 
             end_time__gt=self.start_time # gt: maior que 
@@ -60,9 +73,22 @@ class Reservation(models.Model):
         self.check_reservation()
 
     def save(self, *args, **kwargs):
-        #Sobrescreve save() para sempre chamar clean() antes de salvar, save é um metodo padrão utilizado antes de salvar no banco
-        self.clean()
+        if not self.pk:
+            #Sobrescreve save() para sempre chamar clean() antes de salvar, save é um metodo padrão utilizado antes de salvar no banco
+            self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Reserva {self.id} - {self.room.name} - {self.date} ({self.start_time}-{self.end_time})"
+        return f"Reserva {self.id} - {self.room.name} - {self.date_schedulling} ({self.start_time}-{self.end_time})"
+    
+class History(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE) # Chave estrangeira para o usuário
+    room = models.ForeignKey(Room, on_delete=models.CASCADE) # Chave estrangeira para a sala
+    real_date_schedulling = models.DateField(blank = False, null = False) # Campo para armazenar a data da reserva
+    real_start_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de inicio
+    real_end_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de fim
+    reason = models.TextField(blank = False, null = False, max_length = 200) # campo para armazenar razao da reserva (TextField utilizado para textos grandes)
+    commentary = models.TextField(max_length = 200, blank = True)  # campo para armazenar comentario da reserva 
+
+    def __str__(self):
+        return f"Reserva {self.id} - {self.user.name} - {self.room.name} - {self.real_date_schedulling} ({self.real_start_time}-{self.real_end_time})"

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from safekey.views import UserViewSet, UsersTypesView, loginView, RoomViewSet, ReservationViewSet
+from safekey.views import UserViewSet, UsersTypesView, loginView, RoomViewSet, ReservationViewSet, HistoryViewSet
 from rest_framework import routers
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -23,6 +23,7 @@ router.register('users', UserViewSet) # Registrando minha rota do UsuarioViewSet
 router.register('usersTypes', UsersTypesView) # Registrando minha rota do UsuarioViewSet
 router.register('rooms', RoomViewSet) # Registrando minha rota do RoomViewSet
 router.register('reservations', ReservationViewSet) # Registrando minha rota do ReservationViewSet
+router.register('history', HistoryViewSet, basename='history') # Registrando minha rota do HistoryViewSet
 
 urlpatterns = [
    path('admin/', admin.site.urls),

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from safekey.models import User, UserType, Room, Reservation
+from safekey.models import User, UserType, Room, Reservation, History
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -79,3 +79,8 @@ class ReservationSerializer(serializers.ModelSerializer):
         temp_reservation = Reservation(**data)  # Cria um objeto temporário com os dados recebidos
         temp_reservation.check_reservation()  # Chama a validação do modelo
         return data
+    
+class HistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = History
+        fields = '__all__'
