@@ -18,12 +18,20 @@ schema_view = get_schema_view(
    public=True,
 )
 
+# Roteador para as rotas
 router = routers.DefaultRouter()
 router.register('users', UserViewSet) # Registrando minha rota do UsuarioViewSet
 router.register('usersTypes', UsersTypesView) # Registrando minha rota do UsuarioViewSet
 router.register('rooms', RoomViewSet) # Registrando minha rota do RoomViewSet
 router.register('reservations', ReservationViewSet) # Registrando minha rota do ReservationViewSet
 router.register('history', HistoryViewSet, basename='history') # Registrando minha rota do HistoryViewSet
+
+# Rotas adicionais para as ações customizadas (approve e reject)
+reservation_router = router.urls
+reservation_approve_reject_urls = [
+    path('reservations/<int:pk>/approve/', ReservationViewSet.as_view({'get': 'approve'}), name='approve-reservation'),
+    path('reservations/<int:pk>/reject/', ReservationViewSet.as_view({'get': 'reject'}), name='reject-reservation'),
+]
 
 urlpatterns = [
    path('admin/', admin.site.urls),
@@ -32,4 +40,5 @@ urlpatterns = [
    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+   *reservation_approve_reject_urls,
 ]

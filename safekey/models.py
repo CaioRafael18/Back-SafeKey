@@ -28,13 +28,22 @@ class Room(models.Model):
         return self.name
 
 class Reservation(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE) # Chave estrangeira para o usuário
+    STATUS_CHOICES = [
+        ('Pendente', 'Pendente'),
+        ('Aprovado', 'Aprovado'),
+        ('Recusado', 'Recusado')
+    ]
+    APPROVERS = ['Professor', 'Administrador']
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations') # Chave estrangeira para o usuário
+    responsible = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'type__type__in': APPROVERS}, related_name='responsible_reservations', null = True) # Chave estrangeira para o usuário responsável pela autorização da reserva(sendo apenas prof ou admin)
     room = models.ForeignKey(Room, on_delete=models.CASCADE) # Chave estrangeira para a sala
     date_schedulling = models.DateField(blank = False, null = False) # Campo para armazenar a data da reserva
     start_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de inicio
     end_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de fim
     reason = models.TextField(blank = False, null = False, max_length = 200) # campo para armazenar razao da reserva (TextField utilizado para textos grandes)
     commentary = models.TextField(max_length = 200, blank = True)  # campo para armazenar comentario da reserva 
+    status = models.CharField(max_length = 20, choices=STATUS_CHOICES, default='Aprovado', editable=False) # campo para armazenar o status da reserva
     deleted_at = models.DateTimeField(null = True, blank = True, editable=False) # Campo para gerenciar a exclusão do registro
 
     # Exclui o registro
@@ -71,11 +80,13 @@ class Reservation(models.Model):
     def clean(self):
         # Executa validação ao tentar salvar, clean é um metodo padrão utilizado para validações
         self.check_reservation()
+        if self.user.type.type == 'Aluno':
+            self.status = 'Pendente'
 
     def save(self, *args, **kwargs):
         if not self.pk:
             #Sobrescreve save() para sempre chamar clean() antes de salvar, save é um metodo padrão utilizado antes de salvar no banco
-            self.clean()
+            self.clean()              
         super().save(*args, **kwargs)
 
     def __str__(self):
