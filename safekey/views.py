@@ -69,14 +69,15 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation = serializer.save()  
         
         # Envia um e-mail para o responsável
-        try:
-            self.send_email_to_responsible(reservation)
-        except Exception as e:
-            raise ValidationError({'detail': f'Erro ao enviar e-mail: {str(e)}'})
+        if reservation.responsible is not None:
+            try:
+                self.send_email_to_responsible(reservation)
+            except Exception as e:
+                reservation.delete()
+                raise ValidationError({'detail': f'Erro ao enviar e-mail: {str(e)}'})
 
     def send_email_to_responsible(self, reservation):
-        approve_url = self.generate_action_link(reservation, "approve")
-        reject_url = self.generate_action_link(reservation, "reject")
+        frontend_decision_url = f"http://98.81.255.202:90/decision/reservation/{reservation.id}"
 
         # Envia e-mail ao responsável pela aprovação da reserva
         subject = "Reserva Pendente para Aprovação"
@@ -86,9 +87,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
             f"Data: {reservation.date_schedulling}\n"
             f"Horário: {reservation.start_time} - {reservation.end_time}\n"
             f"Motivo: {reservation.reason}\n\n"
-            f"Aprove ou recuse a reserva:\n"
-            f"Aprovar: {approve_url}\n"
-            f"Recusar: {reject_url}\n"
+            f"Acesse o link abaixo:\n"
+            f"Link: {frontend_decision_url}\n"
         )
 
         context = {
@@ -99,8 +99,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             'start_time': reservation.start_time,
             'end_time': reservation.end_time,
             'reason': reservation.reason,
-            'approve_url': approve_url,
-            'reject_url': reject_url,
+            'link_decision': frontend_decision_url,
         }
 
         html_message = render_to_string('reservation_email.html', context)
@@ -115,7 +114,6 @@ class ReservationViewSet(viewsets.ModelViewSet):
         )
 
     def send_confirmation_email(self, reservation, status):
-        # Função auxiliar para enviar o e-mail de confirmação para o usuário
         try:
             subject = f"Reserva {status}"
             message = (f"Olá {reservation.user.name},\n"
@@ -132,11 +130,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
             raise ValidationError({'detail': f'Erro ao enviar confirmação de e-mail: {str(e)}'})
 
     def generate_action_link(self, reservation, action):
-        # Gera link para aprovar ou recusar reserva
-        url = self.request.build_absolute_uri(
+        return self.request.build_absolute_uri(
             f"/reservations/{reservation.id}/{action}/"
         )
-        return url
 
     def destroy(self, request, *args, **kwargs):
         # Obtém o objeto da reserva
@@ -157,6 +153,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def approve(self, request, pk=None):
         reservation = self.get_object()
+        
+        if reservation.status in ["Aprovado", "Recusado"]:
+            return Response({'detail': 'Essa reserva já foi processada.'}, status=400)
+
         reservation.status = "Aprovado"
         reservation.save()
 
@@ -167,6 +167,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def reject(self, request, pk=None):
         reservation = self.get_object()
+
+        if reservation.status in ["Aprovado", "Recusado"]:
+            return Response({'detail': 'Essa reserva já foi processada.'}, status=400)
+        
         reservation.status = "Recusado"
         reservation.save()
 

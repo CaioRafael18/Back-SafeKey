@@ -35,14 +35,6 @@
             font-weight: bold;
         }
 
-        .approve {
-            background-color: #4CAF50;
-        }
-
-        .reject {
-            background-color: #f44336;
-        }
-
         .button:hover {
             opacity: 0.8;
         }
@@ -56,7 +48,7 @@
 <body>
     <div class="container">
         <h1>Reserva Pendente para Aprovação</h1>
-        <p>Olá {{ responsible_name }},</p>
+        <p>Olá, {{ responsible_name }}!</p>
         <p>O aluno <strong>{{ user_name }}</strong> solicitou uma reserva para a sala: <strong>{{ room_name }}</strong>.
         </p>
         <div class="details">
@@ -64,10 +56,8 @@
             <p><strong>Horário:</strong> {{ start_time }} - {{ end_time }}</p>
             <p><strong>Motivo:</strong> {{ reason }}</p>
         </div>
-        <p>Por favor, selecione uma das opções abaixo para aprovar ou recusar a reserva:</p>
-        <a href="{{ approve_url }}" class="button approve">Aprovar</a>
-        <a href="{{ reject_url }}" class="button reject">Recusar</a>
+        <p>Acesse o link abaixo:</p>
+        <p><a href="{{ link_decision }}" target="_blank">{{ link_decision }}</a></p>
     </div>
 </body>
-
 </html>
