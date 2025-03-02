@@ -29,13 +29,23 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=201)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()  # Obtém o usuário a ser deletado
+        self.perform_destroy(instance)
+        return Response({"detail": "Usuário deletado com sucesso"}, status=204)
 
 # Criando ViewSet com todo o crud do meu modelo TipoUsuario
 class UsersTypesView(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated, PermissionsTypesUsers] 
     queryset = UserType.objects.all()
     serializer_class = UsersTypesSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()  # Obtém o tipo do usuário a ser deletado
+        self.perform_destroy(instance)
+        return Response({"detail": "Tipo de usuário deletado com sucesso"}, status=204)
 
 # Criando ViewSet para o login
 class loginView(TokenObtainPairView):
@@ -57,7 +67,12 @@ class RoomViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=201)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()  # Obtém a sala a ser deletada
+        self.perform_destroy(instance)
+        return Response({"detail": "Sala deletada com sucesso"}, status=204)
 
 # Criando ViewSet para as reservas
 class ReservationViewSet(viewsets.ModelViewSet):
@@ -75,6 +90,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 reservation.delete()
                 raise ValidationError({'detail': f'Erro ao enviar e-mail: {str(e)}'})
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()  # Obtém a reserva a ser deletada
+        self.perform_destroy(instance)
+        return Response({"detail": "Reserva deletada com sucesso"}, status=204)
 
     def send_email_to_responsible(self, reservation):
         frontend_decision_url = f"http://98.81.255.202:90/decision/reservation/{reservation.id}"
@@ -182,3 +202,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
 class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = History.objects.all()
     serializer_class = HistorySerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()  # Obtém o historico a ser deletado
+        self.perform_destroy(instance)
+        return Response({"detail": "Historico deletado com sucesso"}, status=204)
