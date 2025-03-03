@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # Criando ViewSet com todo o crud do meu modelo Usuario
 class UserViewSet(viewsets.ModelViewSet):
@@ -207,8 +208,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         # Envia a notificação via WebSocket para todos os clientes conectados
         channel_layer = get_channel_layer()
         message = f"Status da reserva {reservation.id} atualizado para {reservation.status}."
-        channel_layer.group_send(
-            f"room_status_channel",  # O grupo do WebSocket
+        async_to_sync(channel_layer.group_send)(
+            "room_status_channel",  # O grupo do WebSocket
             {
                 "type": "send_room_status_update",
                 "message": message,

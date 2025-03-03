@@ -3,6 +3,7 @@ from django.utils import timezone
 from channels.layers import get_channel_layer
 from .models import Reservation
 import logging
+from asgiref.sync import async_to_sync
 logger = logging.getLogger(__name__)
 
 @shared_task
@@ -36,8 +37,8 @@ def send_client_status_update(reservation):
     message = f"Status da sala {reservation.room.name} atualizado para {reservation.room.status}."
     logger.info(f"Enviando mensagem para o grupo 'room_status_channel': {message}")
 
-    channel_layer.group_send(
-        f"room_status_channel",  # O grupo do WebSocket
+    async_to_sync(channel_layer.group_send)(
+        "room_status_channel",  # O grupo do WebSocket
         {
             "type": "send_room_status_update",
             "message": message,
