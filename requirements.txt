@@ -19,3 +19,4 @@ redis==5.2.1
 psycopg2-binary==2.9.10
 channels==4.2.0
 channels-redis==4.2.1
+daphne==4.1.2

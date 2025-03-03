@@ -30,17 +30,30 @@ def update_room_status_task():
         if novo_status and room.status != novo_status:
             room.status = novo_status
             room.save()
-            send_client_status_update(room.name, novo_status)
+            send_all_reservations_to_client(reservations)
 
-# Função para enviar mensagem WebSocket corretamente
-def send_client_status_update(room_name, status):
+# Função para enviar todas as reservas para o front-end (completa)
+def send_all_reservations_to_client(reservations):
     channel_layer = get_channel_layer()
-    message = f"Status da sala {room_name} atualizado para {status}."
 
+    # Criação de um dicionário com todas as reservas
+    all_reservations = [
+        {
+            "room_name": reservation.room.name,
+            "status": reservation.room.status,
+            "reservation_id": reservation.id,
+            "start_time": reservation.start_time,
+            "end_time": reservation.end_time,
+            "date_schedulling": reservation.date_schedulling
+        }
+        for reservation in reservations
+    ]
+
+    # Envia para o WebSocket todas as reservas
     async_to_sync(channel_layer.group_send)(
         "room_status_channel",
         {
             "type": "send_room_status_update",
-            "message": message
+            "reservations": all_reservations
         }
     )
