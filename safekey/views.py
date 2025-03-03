@@ -208,7 +208,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         channel_layer = get_channel_layer()
         message = f"Status da reserva {reservation.id} atualizado para {reservation.status}."
         channel_layer.group_send(
-            f"room_status_room_status_channel",  # O grupo do WebSocket
+            f"room_status_channel",  # O grupo do WebSocket
             {
                 "type": "send_room_status_update",
                 "message": message,

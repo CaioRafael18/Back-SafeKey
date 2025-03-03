@@ -36,8 +36,11 @@ class RoomStatusConsumer(AsyncWebsocketConsumer):
     # Método para enviar notificações WebSocket
     async def send_room_status_update(self, event):
         message = event['message']
-        updated = event['updated']
-        await self.send(text_data=json.dumps(
-            {'message': message, 'updated': updated}
-            )
-        )
+        print(f"Recebendo mensagem do grupo: {message}")
+
+        # Verifica se 'updated' está presente no evento
+        response_data = {'message': message}
+        if 'updated' in event:
+            response_data['updated'] = event['updated']
+        
+        await self.send(text_data=json.dumps(response_data))

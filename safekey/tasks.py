@@ -2,6 +2,8 @@ from celery import shared_task
 from django.utils import timezone
 from channels.layers import get_channel_layer
 from .models import Reservation
+import logging
+logger = logging.getLogger(__name__)
 
 @shared_task
 def update_room_status_task():
@@ -32,8 +34,10 @@ def send_client_status_update(reservation):
     # Envia a notificação via WebSocket para todos os clientes conectados
     channel_layer = get_channel_layer()
     message = f"Status da sala {reservation.room.name} atualizado para {reservation.room.status}."
+    logger.info(f"Enviando mensagem para o grupo 'room_status_channel': {message}")
+
     channel_layer.group_send(
-        f"room_status_room_status_channel",  # O grupo do WebSocket
+        f"room_status_channel",  # O grupo do WebSocket
         {
             "type": "send_room_status_update",
             "message": message,
