@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Serviço para o Django
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=setup.settings
+    networks:
+      - backend
+
+  # Serviço para o Celery Worker
+  celery:
+    build: .
+    restart: always
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=setup.settings
+    networks:
+      - backend
+    command: >
+      dockerize -wait tcp://db:5432 -wait tcp://redis:6379 -timeout 30s celery -A setup.celery worker --loglevel=info
+
+  # Serviço para o Celery Beat (para agendamento de tarefas)
+  celery-beat:
+    build: .
+    restart: always
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=setup.settings
+    networks:
+      - backend
+    command: >
+      dockerize -wait tcp://db:5432 -wait tcp://redis:6379 -timeout 30s celery -A setup.celery beat --loglevel=info
+    
+  # Serviço para o banco de dados PostgreSQL
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      - POSTGRES_DB=safekey
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  # Serviço para o Redis (usado pelo Celery)
+  redis:
+    image: redis:6
+    restart: always
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    driver: bridge

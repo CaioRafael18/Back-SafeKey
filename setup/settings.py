@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'safekey',
     'drf_yasg',
     'rest_framework.authtoken',
+    'django_celery_beat',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +76,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'setup.asgi.application'
 WSGI_APPLICATION = 'setup.wsgi.application'
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -88,11 +91,32 @@ EMAIL_HOST_PASSWORD = "yptoowqaslxwlwaa"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  
+        'NAME': 'safekey',                          
+        'USER': 'admin',                          
+        'PASSWORD': 'admin123',                      
+        'HOST': 'db',                        
+        'PORT': '5432',                             
     }
 }
 
+CELERY_BROKER_URL = 'redis://redis:6379/0' 
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0' 
+CELERY_BEAT_SCHEDULE = {
+    'update_room_status_task_every_minute': {
+        'task': 'safekey.tasks.update_room_status_task',  
+        'schedule': 10,  # Executa a cada 10 segundos
+    },
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": ['redis://redis:6379/0'],  
+        },
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
