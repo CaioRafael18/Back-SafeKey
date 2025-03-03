@@ -1,7 +1,6 @@
 from celery import shared_task
 from django.utils import timezone
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync 
 from .models import Reservation
 
 @shared_task
@@ -15,33 +14,29 @@ def update_room_status_task():
     )
 
     for reservation in reservations:
-        room = reservation.room  # Evita acessos desnecessários ao banco
-
-        # Atualiza status da sala
-        novo_status = None
+        # Verifica se a reserva está no horário de ocupação
         if reservation.start_time <= now_time <= reservation.end_time:
-            if room.status != "Ocupado":
-                novo_status = "Ocupado"
+            # Durante o horário da reserva, marca a sala como "Ocupado"
+            if reservation.room.status != "Ocupado":
+                reservation.room.status = "Ocupado"
+                reservation.room.save()
+                send_client_status_update(reservation)
+        # Verifica se a reserva já passou e atualiza o status da sala para "Disponivel"
         elif reservation.end_time < now_time:
-            if room.status != "Disponivel":
-                novo_status = "Disponivel"
+            if reservation.room.status != "Disponivel":
+                reservation.room.status = "Disponivel"
+                reservation.room.save()
+                send_client_status_update(reservation)
 
-        # Apenas salva e envia notificação se houver mudança de status
-        if novo_status and room.status != novo_status:
-            room.status = novo_status
-            room.save()
-            send_client_room_status_update(room.id, novo_status)
-
-# Função para enviar mensagem WebSocket corretamente
-def send_client_room_status_update(room_id, status):
+def send_client_status_update(reservation):
+    # Envia a notificação via WebSocket para todos os clientes conectados
     channel_layer = get_channel_layer()
-    message = f"Status da sala {room_id} atualizado para {status}."
-
-    async_to_sync(channel_layer.group_send)(
-        "room_status_channel",  # Nome do grupo WebSocket correto
+    message = f"Status da sala {reservation.room.name} atualizado para {reservation.room.status}."
+    channel_layer.group_send(
+        f"room_status_room_status_channel",  # O grupo do WebSocket
         {
             "type": "send_room_status_update",
             "message": message,
-            "updated" : "salas"
+            "updated": "salas"
         }
     )
