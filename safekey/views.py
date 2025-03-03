@@ -11,6 +11,8 @@ from rest_framework.decorators import action
 from django.template.loader import render_to_string
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync 
 
 # Criando ViewSet com todo o crud do meu modelo Usuario
 class UserViewSet(viewsets.ModelViewSet):
@@ -180,6 +182,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation.status = "Aprovado"
         reservation.save()
 
+        self.send_reservation_status_update(reservation)
+
         self.send_confirmation_email(reservation, 'Aprovada')
 
         return Response({'detail': 'Reserva aprovada com sucesso.'}, status=200)
@@ -194,9 +198,24 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation.status = "Recusado"
         reservation.save()
 
+        self.send_reservation_status_update(reservation)
+
         self.send_confirmation_email(reservation, 'Recusado')
 
         return Response({'detail': 'Reserva recusada com sucesso.'}, status=200)
+    
+    def send_reservation_status_update(self, reservation):
+        channel_layer = get_channel_layer()
+        message = f"Status da reserva {reservation.id} atualizado para {reservation.status}."
+        
+        async_to_sync(channel_layer.group_send)(
+            "reservation_status_channel",  
+            {
+                "type": "send_room_status_update",
+                "message": message,
+                "updated" : "reservas"
+            }
+        )
     
 # Criando ViewSet para o historico(apenas visualização) 
 class HistoryViewSet(viewsets.ReadOnlyModelViewSet):

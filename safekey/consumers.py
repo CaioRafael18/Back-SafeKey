@@ -29,12 +29,15 @@ class RoomStatusConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "send_room_status_update",
-                "message": "Usuário se desconectou do WebSocket."
+                "message": "Usuário desconectou do WebSocket."
             }
         )
         
     # Método para enviar notificações WebSocket
     async def send_room_status_update(self, event):
-        reservations = event["reservations"]  # Recebe a lista de todas as reservas
-        await self.send(text_data=json.dumps({"reservations": reservations}))
-
+        message = event['message']
+        updated = event['updated']
+        await self.send(text_data=json.dumps(
+            {'message': message, 'updated': updated}
+            )
+        )

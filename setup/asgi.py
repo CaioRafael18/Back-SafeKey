@@ -13,7 +13,7 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(), # Lida com requisições HTTP normais
     "websocket": AuthMiddlewareStack(  # Lida com conexões WebSocket
         URLRouter([
-            path("ws/room_status/", RoomStatusConsumer.as_asgi()),
+            path("ws/status/", RoomStatusConsumer.as_asgi()),
         ])
     ),
 })

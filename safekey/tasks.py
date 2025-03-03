@@ -1,7 +1,7 @@
 from celery import shared_task
 from django.utils import timezone
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync  # Import necessário
+from asgiref.sync import async_to_sync 
 from .models import Reservation
 
 @shared_task
@@ -30,30 +30,18 @@ def update_room_status_task():
         if novo_status and room.status != novo_status:
             room.status = novo_status
             room.save()
-            send_all_reservations_to_client(reservations)
+            send_client_room_status_update(room.id, novo_status)
 
-# Função para enviar todas as reservas para o front-end (completa)
-def send_all_reservations_to_client(reservations):
+# Função para enviar mensagem WebSocket corretamente
+def send_client_room_status_update(room_id, status):
     channel_layer = get_channel_layer()
+    message = f"Status da sala {room_id} atualizado para {status}."
 
-    # Criação de um dicionário com todas as reservas
-    all_reservations = [
-        {
-            "room_name": reservation.room.name,
-            "status": reservation.room.status,
-            "reservation_id": reservation.id,
-            "start_time": reservation.start_time,
-            "end_time": reservation.end_time,
-            "date_schedulling": reservation.date_schedulling
-        }
-        for reservation in reservations
-    ]
-
-    # Envia para o WebSocket todas as reservas
     async_to_sync(channel_layer.group_send)(
-        "room_status_channel",
+        "room_status_channel",  # Nome do grupo WebSocket correto
         {
             "type": "send_room_status_update",
-            "reservations": all_reservations
+            "message": message,
+            "updated" : "salas"
         }
     )
