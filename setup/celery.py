@@ -10,5 +10,5 @@ app = Celery('BACK-SAFEKEY')
 # Carrega a configuração do Celery a partir das configurações do Django
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Descobre tarefas automaticamente dentro das apps do Django
-app.autodiscover_tasks()
+# Descobre tarefas automaticamente da pasta safekey/tasks
+app.autodiscover_tasks(['safekey.tasks'])

@@ -3,7 +3,7 @@ import django
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from safekey.consumers import RoomStatusConsumer  
+from safekey.consumers.consumers import RoomStatusConsumer  
 from django.urls import path
 from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler  # Importa o handler de arquivos estáticos
 

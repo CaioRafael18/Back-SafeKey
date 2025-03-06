@@ -1,6 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
-from safekey.views import UserViewSet, UsersTypesView, loginView, RoomViewSet, ReservationViewSet, HistoryViewSet
+from safekey.views.authentication_views import loginView
+from safekey.views.history_views import HistoryViewSet
+from safekey.views.reservation_views import ReservationViewSet
+from safekey.views.room_views import RoomViewSet
+from safekey.views.user_views import UserViewSet
+from safekey.views.user_types_views import UsersTypesViewSet
 from rest_framework import routers
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -21,7 +26,7 @@ schema_view = get_schema_view(
 # Roteador para as rotas
 router = routers.DefaultRouter()
 router.register('users', UserViewSet) # Registrando minha rota do UsuarioViewSet
-router.register('usersTypes', UsersTypesView) # Registrando minha rota do UsuarioViewSet
+router.register('usersTypes', UsersTypesViewSet) # Registrando minha rota do UsuarioViewSet
 router.register('rooms', RoomViewSet) # Registrando minha rota do RoomViewSet
 router.register('reservations', ReservationViewSet) # Registrando minha rota do ReservationViewSet
 router.register('history', HistoryViewSet, basename='history') # Registrando minha rota do HistoryViewSet

@@ -94,8 +94,8 @@ DATABASES = {
 CELERY_BROKER_URL = 'redis://redis:6379/0' 
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0' 
 CELERY_BEAT_SCHEDULE = {
-    'update_room_status_task_every_seconds': {
-        'task': 'safekey.tasks.update_room_status_task',  
+    'update_status_task_every_seconds': {
+        'task': 'safekey.tasks.tasks.update_status_task',  
         'schedule': 10,  # Executa a cada 10 segundos
     },
 }

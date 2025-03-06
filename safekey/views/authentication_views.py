@@ -1,0 +1,5 @@
+from rest_framework_simplejwt.views import TokenObtainPairView
+from safekey.serializers.authentication_serializers import CustomTokenObtainPairSerializer
+
+class loginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
