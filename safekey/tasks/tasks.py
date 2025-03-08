@@ -16,14 +16,21 @@ def update_status_task():
     for reservation in reservations:
         # Verifica se a reserva está no horário de ocupação
         if reservation.start_time <= now_time <= reservation.end_time:
-            # Durante o horário da reserva, marca a sala como "Ocupado"
-            if reservation.room.status != "Ocupado":
-                reservation.room.status = "Ocupado"
+            # Marca a sala como "Reservada"
+            if reservation.room.status != "Reservada":
+                reservation.room.status = "Reservada"
                 reservation.room.save()
                 WebSocketService.send_type_status_update(reservation.room, "sala")
-        # Verifica se a reserva já passou e atualiza o status da sala para "Disponivel"
+            # Durante o horário da reserva, marca a sala como "Ocupado" e a chave como "Retirada"
+            elif reservation.room.status == "Reservada" and reservation.room.status_key == "Retirada":
+                    reservation.room.status = "Ocupado"
+                    reservation.room.save()
+                    WebSocketService.send_type_status_update(reservation.room, "sala")
+        # Verifica se a reserva já passou e atualiza o status da sala para "Disponivel" e o da reserva para "Encerrado"
         elif reservation.end_time < now_time:
             if reservation.room.status != "Disponivel":
                 reservation.room.status = "Disponivel"
                 reservation.room.save()
+                reservation.status = "Encerrado"
+                reservation.save()
                 WebSocketService.send_type_status_update(reservation.room, "sala")

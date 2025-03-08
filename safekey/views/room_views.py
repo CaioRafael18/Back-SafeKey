@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from safekey.models import Room
 from safekey.serializers import RoomSerializer
+from rest_framework.permissions import IsAuthenticated
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()

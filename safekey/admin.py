@@ -1,5 +1,5 @@
 from django.contrib import admin
-from safekey.models import User
+from safekey.models.user_models import User
 from django import forms
 
 # Criação do formulário para personalizar senha

@@ -21,6 +21,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 URL_FRONTEND = 'http://98.81.255.202:90'
 
+AUTH_USER_MODEL = 'safekey.User'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -135,6 +137,9 @@ AUTHENTICATION_BACKENDS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     ),
 }
 

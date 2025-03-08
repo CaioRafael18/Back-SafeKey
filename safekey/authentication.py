@@ -1,5 +1,5 @@
 from django.contrib.auth.backends import BaseBackend
-from safekey.models import User
+from safekey.models.user_models import User
 from django.contrib.auth.hashers import check_password
 
 class AuthenticationUser(BaseBackend):
