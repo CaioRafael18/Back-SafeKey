@@ -3,7 +3,8 @@ from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 from safekey.models import UserType
-from safekey.serializers import UserSerializer, UsersTypesSerializer
+from safekey.serializers.user_serializers import UserSerializer
+from safekey.serializers.user_types_serializers import UsersTypesSerializer
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
     email = serializers.EmailField()

@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from safekey.models import UserType
-from safekey.serializers import UsersTypesSerializer
+from safekey.serializers.user_types_serializers import UsersTypesSerializer
 
 class UsersTypesViewSet(viewsets.ModelViewSet):
     queryset = UserType.objects.all()

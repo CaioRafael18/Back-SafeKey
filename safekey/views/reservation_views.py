@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from safekey.models import Reservation, User, Room
-from safekey.serializers import ReservationSerializer
+from safekey.serializers.reservation_serializers import ReservationSerializer
 from safekey.services.email_service import EmailService
 from safekey.services.websocket_service import WebSocketService
 from setup.settings import URL_FRONTEND

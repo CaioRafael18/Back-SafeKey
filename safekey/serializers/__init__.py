@@ -1,6 +1,0 @@
-from .authentication_serializers import CustomTokenObtainPairSerializer
-from .history_serializers import HistorySerializer
-from .reservation_serializers import ReservationSerializer
-from .room_serializers import RoomSerializer
-from .user_serializers import UserSerializer
-from .user_types_serializers import UsersTypesSerializer

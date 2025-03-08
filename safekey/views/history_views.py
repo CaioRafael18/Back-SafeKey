@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from safekey.models import History
-from safekey.serializers import HistorySerializer
+from safekey.serializers.history_serializers import HistorySerializer
 
 class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = History.objects.all()

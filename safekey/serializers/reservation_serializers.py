@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from safekey.models import Reservation
-from safekey.serializers import UserSerializer, RoomSerializer
+from safekey.serializers.user_serializers import UserSerializer
+from safekey.serializers.room_serializers import RoomSerializer
 from safekey.models import User, Room
 
 class ReservationSerializer(serializers.ModelSerializer):

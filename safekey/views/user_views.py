@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from safekey.models import User
-from safekey.serializers import UserSerializer
+from safekey.serializers.user_serializers import UserSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all() # buscando todos os dados do meu usuário
