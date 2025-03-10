@@ -144,8 +144,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=1000),  # Tempo de vida do access token
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Tempo de vida do refresh token
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # Tempo de vida do access token
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),  # Tempo de vida do refresh token
     'ROTATE_REFRESH_TOKENS': False,  # Para evitar rotação automática
     'BLACKLIST_AFTER_ROTATION': True,  # Blacklist após rotação
     'ALGORITHM': 'HS256',  # Algoritmo de criptografia

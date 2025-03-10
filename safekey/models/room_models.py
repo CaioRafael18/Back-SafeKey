@@ -16,8 +16,8 @@ class Room(models.Model):
     block = models.CharField(max_length = 10, blank = False) # bloco da sala
     floor = models.CharField(max_length = 10, blank = False) # andar da sala
     type  = models.CharField(max_length = 15, blank = False) # tipo da sala
-    status = models.CharField(max_length = 20, choices=STATUS_CHOICES_ROOM, default = 'Disponivel', editable=False) # status da sala (editable Impede edição no formulário)
-    status_key = models.CharField(max_length = 20, choices=STATUS_KEY_CHOICES, default = "Disponivel", editable=False) # status da chave da sala 
+    status = models.CharField(max_length = 20, choices=STATUS_CHOICES_ROOM, default = 'Disponivel') # status da sala (editable Impede edição no formulário)
+    status_key = models.CharField(max_length = 20, choices=STATUS_KEY_CHOICES, default = "Disponivel") # status da chave da sala 
 
     def __str__(self):
         return self.name
