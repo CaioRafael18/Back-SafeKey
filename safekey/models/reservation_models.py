@@ -15,7 +15,7 @@ class Reservation(models.Model):
     APPROVERS = ['Professor', 'Administrador']
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations') # Chave estrangeira para o usuário
-    responsible = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'type__type__in': APPROVERS}, related_name='responsible_reservations', null = True) # Chave estrangeira para o usuário responsável pela autorização da reserva(sendo apenas prof ou admin)
+    responsible = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'type__type__in': APPROVERS},default='NUll' ,related_name='responsible_reservations', null = True) # Chave estrangeira para o usuário responsável pela autorização da reserva(sendo apenas prof ou admin)
     room = models.ForeignKey(Room, on_delete=models.CASCADE) # Chave estrangeira para a sala
     date_schedulling = models.DateField(blank = False, null = False) # Campo para armazenar a data da reserva
     start_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de inicio
