@@ -7,6 +7,7 @@ from safekey.serializers.reservation_serializers import ReservationSerializer
 from safekey.services.email_service import EmailService
 from safekey.services.websocket_service import WebSocketService
 from setup.settings import URL_FRONTEND
+from rest_framework.permissions import AllowAny
 
 class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.filter(deleted_at__isnull=True)
@@ -30,9 +31,16 @@ class ReservationViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response({"detail": "Reserva deletada com sucesso"}, status=204)    
 
-    def update_reservation_status(self, reservation, status):
+    def update_reservation_status(self, reservation, status, user):
         if reservation.status in ["Aprovado", "Recusado"]:
             return Response({'detail': 'Essa reserva já foi processada.'}, status=400)
+        
+        # Se o usuário for publico, atualiza o status da chave e da sala
+        if user == "public":
+            room = Room.objects.get(id=reservation.room.id)
+            room.status = "Ocupado"
+            room.status_key = "Retirada"
+            room.save()
         
         reservation.status = status
         reservation.save()
@@ -41,16 +49,42 @@ class ReservationViewSet(viewsets.ModelViewSet):
         return Response({'detail': f'Reserva {status.lower()} com sucesso.'}, status=200)
     
     # Rota para aprovar uma reserva
-    @action(detail=True, methods=['GET'])
+    @action(detail=True, methods=['GET','POST'], permission_classes=[AllowAny])
     def approve(self, request, pk=None):
         reservation = self.get_object()
-        return self.update_reservation_status(reservation, "Aprovado")
+
+        # Se for POST, verifica se está vindo o "public"
+        if request.method == "POST":
+            user = request.data.get("user", None)
+
+            if user != "public":
+                return Response({"detail": "Autenticação necessária."}, status=401)
+        # Se for GET, exige autenticação normal
+        else:
+            if not request.user.is_authenticated:
+                return Response({"detail": "Autenticação necessária."}, status=401)
+            user = request.user 
+
+        return self.update_reservation_status(reservation, "Aprovado", user)
         
     # Rota para recusar uma reserva
     @action(detail=True, methods=['GET'])
     def reject(self, request, pk=None):
         reservation = self.get_object()
         return self.update_reservation_status(reservation, "Recusado")
+    
+    # Rota para devolver uma chave
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def return_key(self, request, pk=None):
+        reservation = self.get_object()
+        reservation.status = "Encerrado"
+        reservation.save()
+
+        room = Room.objects.get(id=reservation.room.id)
+        room.status = "Disponivel"
+        room.status_key = "Disponivel"
+        room.save()
+        return Response({'detail': 'Chave devolvida com sucesso.'}, status=200)
     
     # Rota para buscar todas as reservas de um usuário
     @action(detail=True, methods=['GET'])
@@ -68,6 +102,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         serializer = ReservationSerializer(reservations, many=True)
         return Response(serializer.data, status=200)
     
+    # Rota para deletar várias reservas
     @action(detail=False, methods=['DELETE'])
     def listReservations(self, request):
         if request.method == 'DELETE':

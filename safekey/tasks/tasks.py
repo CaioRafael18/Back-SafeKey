@@ -14,23 +14,34 @@ def update_status_task():
     )
 
     for reservation in reservations:
-        # Verifica se a reserva está no horário de ocupação
+        # Pula a reserva sem 'end_time'        
+        if reservation.end_time is None:
+            continue
+
         if reservation.start_time <= now_time <= reservation.end_time:
-            # Marca a sala como "Reservada"
-            if reservation.room.status == "Disponivel":
-                reservation.room.status = "Reservada"
-                reservation.room.save()
-                WebSocketService.send_type_status_update(reservation.room, "sala")
-            # Durante o horário da reserva, marca a sala como "Ocupado" e a chave como "Retirada"
-            elif reservation.room.status == "Reservada" and reservation.room.status_key == "Retirada":
-                    reservation.room.status = "Ocupado"
-                    reservation.room.save()
-                    WebSocketService.send_type_status_update(reservation.room, "sala")
-        # Verifica se a reserva já passou e atualiza o status da sala para "Disponivel" e o da reserva para "Encerrado"
-        elif reservation.end_time < now_time:
-            if reservation.room.status != "Disponivel":
-                reservation.room.status = "Disponivel"
-                reservation.room.save()
-                reservation.status = "Encerrado"
-                reservation.save()
-                WebSocketService.send_type_status_update(reservation.room, "sala")
+            # Atualiza status baseado no horário de ocupação
+            update_room_status(reservation, now_time)
+
+        # Verifica se a reserva já passou
+        if reservation.end_time < now_time:
+            close_reservation(reservation)
+
+# Atualiza o status da sala durante o horário da reserva
+def update_room_status(reservation, now_time):
+    if reservation.room.status == "Disponivel":
+        set_room_status(reservation.room, "Reservada", "sala")
+    elif reservation.room.status == "Reservada" and reservation.room.status_key == "Retirada":
+        set_room_status(reservation.room, "Ocupado", "sala")
+    
+# Marca a sala como disponível e encerra a reserva se já passou 
+def close_reservation(reservation):
+    if reservation.room.status != "Disponivel":
+        set_room_status(reservation.room, "Disponivel", "sala")
+        reservation.status = "Encerrado"
+        reservation.save()
+
+# Define o status da sala e envia a atualização via WebSocket
+def set_room_status(room, status, websocket_type):
+    room.status = status
+    room.save()
+    WebSocketService.send_type_status_update(room, websocket_type)

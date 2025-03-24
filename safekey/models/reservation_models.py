@@ -19,8 +19,10 @@ class Reservation(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE) # Chave estrangeira para a sala
     date_schedulling = models.DateField(blank = False, null = False) # Campo para armazenar a data da reserva
     start_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de inicio
-    end_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de fim
-    reason = models.TextField(blank = False, null = False, max_length = 200) # campo para armazenar razao da reserva (TextField utilizado para textos grandes)
+    end_time = models.TimeField(blank = False, null = True) # Campo para armazenar o horário de fim
+    real_start_time = models.TimeField(blank = False, null = True) # Campo para armazenar o horário de inicio real
+    real_end_time = models.TimeField(blank = False, null = True) # Campo para armazenar o horário de fim real
+    reason = models.TextField(blank = False, null = True) # campo para armazenar razao da reserva (TextField utilizado para textos grandes)
     commentary = models.TextField(max_length = 200, blank = True)  # campo para armazenar comentario da reserva 
     status = models.CharField(max_length = 20, choices=STATUS_CHOICES, default='Aprovado', editable=False) # campo para armazenar o status da reserva
     deleted_at = models.DateTimeField(null = True, blank = True, editable=False) # Campo para gerenciar a exclusão do registro
