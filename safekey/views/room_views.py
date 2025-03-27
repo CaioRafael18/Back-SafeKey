@@ -41,14 +41,14 @@ class RoomViewSet(viewsets.ModelViewSet):
         self.update_room_status(room, "Disponivel","Disponivel")
 
     # Rota publica para exibir todas as salas
-    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
-    def getRooms(self, request, pk=None):
+    @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
+    def public(self, request, pk=None):
         room = Room.objects.all()
         serializer = RoomSerializer(room, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['POST', 'PUT', 'PATCH', 'DELETE'])
-    def listRooms(self, request):
+    def list_rooms(self, request):
         if request.method == 'POST':
             return self.create_rooms(request)
         elif request.method in ['PUT', 'PATCH']:

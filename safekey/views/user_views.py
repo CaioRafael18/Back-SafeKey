@@ -15,14 +15,14 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({"detail": "Usuário deletado com sucesso"}, status=204)
     
     # Rota publica para exibir todas os usuários
-    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
-    def getUsers(self, request, pk=None):
+    @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
+    def public(self, request, pk=None):
         user = User.objects.all()
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['POST', 'PUT', 'PATCH', 'DELETE'])
-    def listUsers(self, request):
+    def list_users(self, request):
         if request.method == 'POST':
             return self.create_users(request)
         elif request.method in ['PUT', 'PATCH']:

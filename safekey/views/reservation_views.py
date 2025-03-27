@@ -56,7 +56,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     
     # Rota para buscar todas as reservas de um usuário
     @action(detail=True, methods=['GET'])
-    def userReservations(self, request, pk=None):
+    def user_reservations(self, request, pk=None):
         user = User.objects.get(id=pk)
         reservations = Reservation.objects.filter(user=user)
         serializer = ReservationSerializer(reservations, many=True)
@@ -64,22 +64,22 @@ class ReservationViewSet(viewsets.ModelViewSet):
     
     # Rota para buscar todas as reservas de uma sala
     @action(detail=True, methods=['GET'])
-    def roomReservations(self, request, pk=None):
+    def room_reservations(self, request, pk=None):
         room = Room.objects.get(id=pk)
         reservations = Reservation.objects.filter(room=room)
         serializer = ReservationSerializer(reservations, many=True)
         return Response(serializer.data, status=200)
     
     # Rota publica para exibir todas as reservas
-    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
-    def getReservations(self, request, pk=None):
+    @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
+    def public(self, request, pk=None):
         reservation = Reservation.objects.all()
         serializer = ReservationSerializer(reservation, many=True)
         return Response(serializer.data)
     
     # Rota para deletar várias reservas
     @action(detail=False, methods=['DELETE'])
-    def listReservations(self, request):
+    def list_reservations(self, request):
         if request.method == 'DELETE':
             if isinstance(request.data, list):
                 ids = [reservation.get("id") for reservation in request.data if "id" in reservation]  # Extrai apenas os IDs
