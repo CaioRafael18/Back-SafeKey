@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from safekey.models import Reservation, User, Room
+from safekey.views.room_views import RoomViewSet
 from safekey.serializers.reservation_serializers import ReservationSerializer
 from safekey.services.email_service import EmailService
 from safekey.services.websocket_service import WebSocketService
@@ -76,6 +77,35 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation = Reservation.objects.all()
         serializer = ReservationSerializer(reservation, many=True)
         return Response(serializer.data)
+    
+    # Rota publica para remover uma chave
+    @action(detail=False, methods=['POST'], permission_classes=[AllowAny])
+    def remove_key(self, request):
+        serializer = self.get_serializer(data=request.data)
+        
+        # Se for válido Salva a reserva no banco
+        if serializer.is_valid():
+            reservation = serializer.save() 
+            room = Room.objects.get(id=reservation.room.id)
+            
+            RoomViewSet.update_room_status(room, "Ocupado", "Retirada")
+            return Response({"detail": "Chave retirada com sucesso."}, status=200)
+        return Response(serializer.errors, status=400)
+
+    # Rota publica para devolver uma chave
+    @action(detail=True, methods=['PATCH'], permission_classes=[AllowAny])
+    def return_key(self, request, pk=None):
+        reservation = self.get_object()
+        
+        # Se for válido atualiza os dados da reserva com os dados enviados pelo front
+        serializer = self.get_serializer(reservation, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save() 
+            room = Room.objects.get(id=reservation.room.id)
+            
+            RoomViewSet.update_room_status(room, "Disponível", "Disponível")
+            return Response({"detail": "Chave devolvida com sucesso."}, status=200)
+        return Response(serializer.errors, status=400)
     
     # Rota para deletar várias reservas
     @action(detail=False, methods=['DELETE'])
