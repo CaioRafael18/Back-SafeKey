@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from safekey.models import Room
 from safekey.serializers.room_serializers import RoomSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
+from safekey.services.websocket_service import WebSocketService
+from safekey.views.reservation_views import ReservationViewSet
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
@@ -13,6 +15,37 @@ class RoomViewSet(viewsets.ModelViewSet):
         instance = self.get_object()  # Obtém a sala a ser deletada
         self.perform_destroy(instance)
         return Response({"detail": "Sala deletada com sucesso"}, status=204)
+    
+    # Rota para atualizar status da sala
+    def update_room_status(self, room, status, status_key):
+        room.status = status
+        room.status_key = status_key
+        room.save()
+        WebSocketService.send_type_status_update(room, "sala")
+        return Response({'detail': f'Status da sala atualizado para {status.lower()} e da chave para {status_key.lower()}.'}, status=200)
+    
+    # Rota publica para remover uma chave
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def remove_key(self, request, pk=None):
+        reservation = self.get_object()
+        room = Room.objects.get(id=reservation.room.id)
+        ReservationViewSet.update_reservation_status(reservation, "Aprovado")
+        self.update_room_status(room, "Ocupado","Retirada")
+    
+    # Rota publica para devolver uma chave
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def return_key(self, request, pk=None):
+        reservation = self.get_object()
+        room = Room.objects.get(id=reservation.room.id)
+        ReservationViewSet.update_reservation_status(reservation, "Encerrado")
+        self.update_room_status(room, "Disponivel","Disponivel")
+
+    # Rota publica para exibir todas as salas
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def getRooms(self, request, pk=None):
+        room = Room.objects.all()
+        serializer = RoomSerializer(room, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=['POST', 'PUT', 'PATCH', 'DELETE'])
     def listRooms(self, request):

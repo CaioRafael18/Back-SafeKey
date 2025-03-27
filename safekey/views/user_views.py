@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from safekey.models import User
 from safekey.serializers.user_serializers import UserSerializer
+from rest_framework.permissions import AllowAny
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all() # buscando todos os dados do meu usuário
@@ -12,6 +13,13 @@ class UserViewSet(viewsets.ModelViewSet):
         instance = self.get_object()  # Obtém o usuário a ser deletado
         self.perform_destroy(instance)
         return Response({"detail": "Usuário deletado com sucesso"}, status=204)
+    
+    # Rota publica para exibir todas os usuários
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def getUsers(self, request, pk=None):
+        user = User.objects.all()
+        serializer = UserSerializer(user, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=['POST', 'PUT', 'PATCH', 'DELETE'])
     def listUsers(self, request):
