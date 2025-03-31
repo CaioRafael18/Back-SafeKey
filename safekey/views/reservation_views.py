@@ -74,7 +74,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     # Rota publica para exibir todas as reservas
     @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
     def public(self, request, pk=None):
-        reservation = Reservation.objects.all()
+        reservation = Reservation.objects.all().order_by('-id')
         serializer = ReservationSerializer(reservation, many=True)
         return Response(serializer.data)
     
@@ -88,8 +88,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             reservation = serializer.save() 
             room = Room.objects.get(id=reservation.room.id)
             
-            room_viewset = RoomViewSet()
-            room_viewset.update_room_status(room, "Ocupado", "Retirada")
+            RoomViewSet().update_room_status(room, "Ocupado", "Retirada")
             self.update_reservation_status(reservation, "Aprovado")
             return Response({"detail": "Chave retirada com sucesso."}, status=200)
         return Response(serializer.errors, status=400)
@@ -105,9 +104,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
             serializer.save() 
             room = Room.objects.get(id=reservation.room.id)
             
-            room_viewset = RoomViewSet()
-            room_viewset.update_room_status(room, "Disponivel", "Disponivel")
-            self.update_reservation_status(reservation, "Disponivel")
+            RoomViewSet().update_room_status(room, "Disponivel", "Disponivel")
+            self.update_reservation_status(reservation, "Encerrado")
             return Response({"detail": "Chave devolvida com sucesso."}, status=200)
 
         return Response(serializer.errors, status=400)

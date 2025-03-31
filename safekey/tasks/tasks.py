@@ -20,14 +20,14 @@ def update_status_task():
 
         if reservation.start_time <= now_time <= reservation.end_time:
             # Atualiza status baseado no horário de ocupação
-            update_room_status(reservation, now_time)
+            update_room_status(reservation)
 
         # Verifica se a reserva já passou
         if reservation.end_time < now_time:
             close_reservation(reservation)
 
 # Atualiza o status da sala durante o horário da reserva
-def update_room_status(reservation, now_time):
+def update_room_status(reservation):
     if reservation.room.status == "Disponivel":
         set_room_status(reservation.room, "Reservada", "sala")
     elif reservation.room.status == "Reservada" and reservation.room.status_key == "Retirada":

@@ -25,7 +25,7 @@ class RoomViewSet(viewsets.ModelViewSet):
     # Rota publica para exibir todas as salas
     @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
     def public(self, request, pk=None):
-        room = Room.objects.all()
+        room = Room.objects.all().order_by('-id')
         serializer = RoomSerializer(room, many=True)
         return Response(serializer.data)
     

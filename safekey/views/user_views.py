@@ -17,7 +17,7 @@ class UserViewSet(viewsets.ModelViewSet):
     # Rota publica para exibir todas os usuários
     @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
     def public(self, request, pk=None):
-        user = User.objects.all()
+        user = User.objects.all().order_by('-id')
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
     
