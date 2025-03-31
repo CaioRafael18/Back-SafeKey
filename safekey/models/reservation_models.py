@@ -15,14 +15,14 @@ class Reservation(models.Model):
     APPROVERS = ['Professor', 'Administrador']
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations') # Chave estrangeira para o usuário
-    responsible = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'type__type__in': APPROVERS},default='NUll' ,related_name='responsible_reservations', null = True) # Chave estrangeira para o usuário responsável pela autorização da reserva(sendo apenas prof ou admin)
+    responsible = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'type__type__in': APPROVERS}, related_name='responsible_reservations',null=True, blank=True) # Chave estrangeira para o usuário responsável pela autorização da reserva(sendo apenas prof ou admin)
     room = models.ForeignKey(Room, on_delete=models.CASCADE) # Chave estrangeira para a sala
     date_schedulling = models.DateField(blank = False, null = False) # Campo para armazenar a data da reserva
     start_time = models.TimeField(blank = False, null = False) # Campo para armazenar o horário de inicio
-    end_time = models.TimeField(blank = False, null = True) # Campo para armazenar o horário de fim
-    real_start_time = models.TimeField(blank = False, null = True) # Campo para armazenar o horário de inicio real
-    real_end_time = models.TimeField(blank = False, null = True) # Campo para armazenar o horário de fim real
-    reason = models.TextField(blank = False, null = True) # campo para armazenar razao da reserva (TextField utilizado para textos grandes)
+    end_time = models.TimeField(blank = True, null = True) # Campo para armazenar o horário de fim
+    real_start_time = models.TimeField(blank = True, null = True) # Campo para armazenar o horário de inicio real
+    real_end_time = models.TimeField(blank = True, null = True) # Campo para armazenar o horário de fim real
+    reason = models.TextField(blank = True, null = True) # campo para armazenar razao da reserva (TextField utilizado para textos grandes)
     commentary = models.TextField(max_length = 200, blank = True)  # campo para armazenar comentario da reserva 
     status = models.CharField(max_length = 20, choices=STATUS_CHOICES, default='Aprovado', editable=False) # campo para armazenar o status da reserva
     deleted_at = models.DateTimeField(null = True, blank = True, editable=False) # Campo para gerenciar a exclusão do registro
@@ -46,17 +46,18 @@ class Reservation(models.Model):
         )
         
     def check_reservation(self):
-        # Verifica se há conflito de reservas para a mesma sala e horário
-        conflict = Reservation.objects.filter(
-            room=self.room,
-            date_schedulling=self.date_schedulling,
-            deleted_at__isnull=True,
-            start_time__lt=self.end_time, # lt: menor que 
-            end_time__gt=self.start_time # gt: maior que 
-        ).exclude(id=self.id)  # Exclui a própria reserva se for uma edição para não ter risco de comparar com ela mesma
+        if self.end_time:
+            # Verifica se há conflito de reservas para a mesma sala e horário
+            conflict = Reservation.objects.filter(
+                room=self.room,
+                date_schedulling=self.date_schedulling,
+                deleted_at__isnull=True,
+                start_time__lt=self.end_time, # lt: menor que 
+                end_time__gt=self.start_time # gt: maior que 
+            ).exclude(id=self.id)  # Exclui a própria reserva se for uma edição para não ter risco de comparar com ela mesma
 
-        if conflict.exists():
-            raise ValidationError({'detail': "A sala já está reservada para o mesmo dia e horário."})
+            if conflict.exists():
+                raise ValidationError({'detail': "A sala já está reservada para o mesmo dia e horário."})
 
     def clean(self):
         # Executa validação ao tentar salvar, clean é um metodo padrão utilizado para validações

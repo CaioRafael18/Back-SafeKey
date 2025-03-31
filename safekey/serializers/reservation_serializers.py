@@ -16,7 +16,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         queryset=Room.objects.all(), source="room", write_only=True
     )
     responsible_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), source="responsible", write_only=True, allow_null=True
+        queryset=User.objects.all(), source="responsible", write_only=True, allow_null=True, required=False
     )
 
     class Meta:
@@ -37,7 +37,10 @@ class ReservationSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
+        if self.partial:  # Permite updates parciais sem validações rigorosas
+            return data
+            
         # Valida conflitos antes de salvar no banco
         temp_reservation = Reservation(**data)  # Cria um objeto temporário com os dados recebidos
         temp_reservation.check_reservation()  # Chama a validação do modelo
-        return data
+        return data 

@@ -88,7 +88,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
             reservation = serializer.save() 
             room = Room.objects.get(id=reservation.room.id)
             
-            RoomViewSet.update_room_status(room, "Ocupado", "Retirada")
+            room_viewset = RoomViewSet()
+            room_viewset.update_room_status(room, "Ocupado", "Retirada")
+            self.update_reservation_status(reservation, "Aprovado")
             return Response({"detail": "Chave retirada com sucesso."}, status=200)
         return Response(serializer.errors, status=400)
 
@@ -103,8 +105,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
             serializer.save() 
             room = Room.objects.get(id=reservation.room.id)
             
-            RoomViewSet.update_room_status(room, "Disponível", "Disponível")
+            room_viewset = RoomViewSet()
+            room_viewset.update_room_status(room, "Disponivel", "Disponivel")
+            self.update_reservation_status(reservation, "Disponivel")
             return Response({"detail": "Chave devolvida com sucesso."}, status=200)
+
         return Response(serializer.errors, status=400)
     
     # Rota para deletar várias reservas
