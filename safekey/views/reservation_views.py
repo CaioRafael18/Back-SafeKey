@@ -34,8 +34,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     # Rota para atualizar status da reserva
     def update_reservation_status(self, reservation, status):
-        if reservation.status in ["Aprovado", "Recusado"]:
-            return Response({'detail': 'Essa reserva já foi processada.'}, status=400)
+        # if reservation.status in ["Aprovado", "Recusado"]:
+        #    return Response({'detail': 'Essa reserva já foi processada.'}, status=400)
         
         reservation.status = status
         reservation.save()
